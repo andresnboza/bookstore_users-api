@@ -1,0 +1,18 @@
+package utils
+
+import (
+	"time"
+)
+
+const (
+	apiDataLayout = "2006-01-02 15:04:05"
+)
+
+func GetNow() time.Time {
+	return time.Now.UTC()
+}
+
+func GetNowString() string {
+	now := time.Now().UTC()
+	user.DateCreated = now.Format(apiDataLayout)
+}
