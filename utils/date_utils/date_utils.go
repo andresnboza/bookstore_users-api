@@ -1,4 +1,4 @@
-package utils
+package date_utils
 
 import (
 	"time"
@@ -9,10 +9,10 @@ const (
 )
 
 func GetNow() time.Time {
-	return time.Now.UTC()
+	return time.Now().UTC()
 }
 
 func GetNowString() string {
 	now := time.Now().UTC()
-	user.DateCreated = now.Format(apiDataLayout)
+	return now.Format(apiDataLayout)
 }
