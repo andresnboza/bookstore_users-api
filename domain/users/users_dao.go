@@ -2,17 +2,17 @@ package users
 
 import (
 	"fmt"
-
+	"strings"
 	"github.com/user/bookstore_users-api/datasources/mysql/users_db"
+	"github.com/user/bookstore_users-api/utils/date_utils"
 	"github.com/user/bookstore_users-api/utils/errors"
 )
 
 const (
-	queryInsertUser = "INSERT INTO users(first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
-)
-
-var (
-	usersDB = make(map[int64]*User)
+	indexUniqueEmail = "email_UNIQUE"
+	errorNoRow       = "no rows in result set"
+	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
+	queryGetUser     = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
 )
 
 func (user *User) Get() *errors.RestErr {
@@ -20,16 +20,21 @@ func (user *User) Get() *errors.RestErr {
 		panic(err)
 	}
 
-	result := usersDB[user.Id]
-	if result == nil {
-		return errors.NewNotFoundError(fmt.Sprintf("user %d not found", user.Id))
+	// Preparing the statement to the user save
+	stmt, err := users_db.Client.Prepare(queryGetUser)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
+	defer stmt.Close() // Very important to execute
 
-	user.Id = result.Id
-	user.FirstName = result.FirstName
-	user.LastName = result.LastName
-	user.Email = result.Email
-	user.DateCreated = result.DateCreated
+	// Making the call to the database with the statement
+	result := stmt.QueryRow(user.Id)
+	if err := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); err != nil {
+		if strings.Contains(err.Error(), errorNoRow) {
+			return errors.NewNotFoundError(fmt.Sprintf("user with id (%d) does NOT exists", user.Id))
+		}
+		return errors.NewInternalServerError(fmt.Sprintf("error when trying to get user %d: %s", user.Id, err.Error()))
+	}
 
 	return nil
 }
@@ -43,9 +48,15 @@ func (user *User) Save() *errors.RestErr {
 	}
 	defer stmt.Close() // Very important to execute
 
+	// Setting the user.date_created
+	user.DateCreated = date_utils.GetNowString()
+
 	// Inserting the user with the valid statement
 	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
 	if err != nil {
+		if strings.Contains(err.Error(), indexUniqueEmail) {
+			return errors.NewBadRequestError(fmt.Sprintf("email (%s) already exists", user.Email))
+		}
 		return errors.NewInternalServerError(fmt.Sprintf("error when trying to save user: %s", err.Error()))
 	}
 
