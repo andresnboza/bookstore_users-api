@@ -11,3 +11,6 @@ build:
 
 run:
 	go run main.go
+
+build2:
+	docker build -t src/main .
