@@ -1,82 +1,55 @@
 package users
 
 import (
-	"fmt"
-	"strings"
-
-	"github.com/go-sql-driver/mysql"
 	"github.com/user/bookstore_users-api/datasources/mysql/users_db"
 	"github.com/user/bookstore_users-api/utils/date_utils"
 	"github.com/user/bookstore_users-api/utils/errors"
+	"github.com/user/bookstore_users-api/utils/mysql_utils"
 )
 
 const (
 	indexUniqueEmail = "email_UNIQUE"
-	errorNoRow       = "no rows in result set"
+	errorNoRows      = "no rows in result set"
 	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
 	queryGetUser     = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
 )
 
 func (user *User) Get() *errors.RestErr {
-	if err := users_db.Client.Ping(); err != nil {
-		panic(err)
-	}
-
-	// Preparing the statement to the user save
-	stmt, err := users_db.Client.Prepare(queryGetUser)
+	stmt, err := users_db.Client.Prepare(queryGetUser) // Preparing the statement to the user save
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
 	defer stmt.Close() // Very important to execute
 
-	// Making the call to the database with the statement
-	result := stmt.QueryRow(user.Id)
-	if err := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); err != nil {
-		if strings.Contains(err.Error(), errorNoRow) {
-			return errors.NewNotFoundError(fmt.Sprintf("user with id (%d) does NOT exists", user.Id))
-		}
-		return errors.NewInternalServerError(fmt.Sprintf("error when trying to get user %d: %s", user.Id, err.Error()))
+	result := stmt.QueryRow(user.Id) // Making the call to the database with the statement
+
+	if getErr := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); getErr != nil {
+		return mysql_utils.ParseError(getErr)
 	}
 
 	return nil
 }
 
 func (user *User) Save() *errors.RestErr {
-
-	// Preparing the statement to the user save
-	stmt, err := users_db.Client.Prepare(queryInsertUser)
+	stmt, err := users_db.Client.Prepare(queryInsertUser) // Preparing the statement to the user save
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
 	defer stmt.Close() // Very important to execute
 
-	// Setting the user.date_created
-	user.DateCreated = date_utils.GetNowString()
+	user.DateCreated = date_utils.GetNowString() // Setting the user.date_created
 
-	// Inserting the user with the valid statement
-	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated) // Inserting the user with the valid statement
+
 	if saveErr != nil {
-		// Looking if we are handling a mysql error, an error that we can't have any certainty
-		sqlErr, ok := saveErr.(*mysql.MySQLError)
-		if !ok {
-			return errors.NewInternalServerError(fmt.Sprintf("error when trying to save user: %s", saveErr.Error()))
-		}
-		// Now looing for more custom errors
-		switch sqlErr.Number {
-		case 1062:
-			return errors.NewBadRequestError(fmt.Sprintf("email (%s) already exists", user.Email))
-		default:
-			return errors.NewInternalServerError(fmt.Sprintf("error when trying to save user: %s", saveErr.Error()))
-		}
+		return mysql_utils.ParseError(saveErr)
 	}
 
-	// Getting the id of the recently created user
-	userId, err := insertResult.LastInsertId()
+	userId, err := insertResult.LastInsertId() // Getting the id of the recently created user
 	if err != nil {
-		return errors.NewInternalServerError(fmt.Sprintf("error when trying get last inserted id of user: %s", err.Error()))
+		return mysql_utils.ParseError(saveErr)
 	}
 
-	// Setting the user id to the result
-	user.Id = userId
+	user.Id = userId // Setting the user id to the result
 	return nil
 }
