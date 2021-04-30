@@ -3,6 +3,8 @@ package users
 import (
 	"fmt"
 	"strings"
+
+	"github.com/go-sql-driver/mysql"
 	"github.com/user/bookstore_users-api/datasources/mysql/users_db"
 	"github.com/user/bookstore_users-api/utils/date_utils"
 	"github.com/user/bookstore_users-api/utils/errors"
@@ -52,12 +54,20 @@ func (user *User) Save() *errors.RestErr {
 	user.DateCreated = date_utils.GetNowString()
 
 	// Inserting the user with the valid statement
-	insertResult, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
-	if err != nil {
-		if strings.Contains(err.Error(), indexUniqueEmail) {
-			return errors.NewBadRequestError(fmt.Sprintf("email (%s) already exists", user.Email))
+	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	if saveErr != nil {
+		// Looking if we are handling a mysql error, an error that we can't have any certainty
+		sqlErr, ok := saveErr.(*mysql.MySQLError)
+		if !ok {
+			return errors.NewInternalServerError(fmt.Sprintf("error when trying to save user: %s", saveErr.Error()))
 		}
-		return errors.NewInternalServerError(fmt.Sprintf("error when trying to save user: %s", err.Error()))
+		// Now looing for more custom errors
+		switch sqlErr.Number {
+		case 1062:
+			return errors.NewBadRequestError(fmt.Sprintf("email (%s) already exists", user.Email))
+		default:
+			return errors.NewInternalServerError(fmt.Sprintf("error when trying to save user: %s", saveErr.Error()))
+		}
 	}
 
 	// Getting the id of the recently created user
