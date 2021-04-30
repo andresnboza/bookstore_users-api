@@ -1,6 +1,7 @@
 # Users Api using Golang and mySQl
 
 - This is an API that is part of a bigger microservice
+- To run in the local environment, remember to create a user in mysql with al priviledges
 
 ## To build the container
 

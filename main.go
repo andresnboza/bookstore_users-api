@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/andresnboza/bookstore_users-api/app"
+	"github.com/user/bookstore_users-api/app"
 )
 
 func main() {

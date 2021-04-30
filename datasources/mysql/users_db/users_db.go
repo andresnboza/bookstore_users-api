@@ -19,18 +19,18 @@ var (
 	Client *sql.DB
 
 	// os.Setenv(mysql_users_username, 	"root")
-	// os.Setenv(mysql_users_password,	  "admin123")
-	// os.Setenv(mysql_users_host, 			"127.0.0.1:3306")
-	// os.Setenv(mysql_users_schema, 		"users_db")
+	// os.Setenv(mysql_users_password,	"admin123")
+	// os.Setenv(mysql_users_host, 	    "127.0.0.1:3306")
+	// os.Setenv(mysql_users_schema, 	"users_db")
 
-	// username = os.Getenv(mysql_users_username) || "root"
-	// password = os.Getenv(mysql_users_password) || "admin123"
-	// host     = os.Getenv(mysql_users_host) || "127.0.0.1:3306"
-	// schema   = os.Getenv(mysql_users_schema) || "users_db"
+	// username = os.Getenv(mysql_users_username)
+	// password = os.Getenv(mysql_users_password)
+	// host     = os.Getenv(mysql_users_host)
+	// schema   = os.Getenv(mysql_users_schema)
 
 	// TODO: eliminate these when useing docker
-	username = "root"
-	password = "admin123"
+	username = "andres"
+	password = "Taquito.123"
 	host     = "127.0.0.1:3306"
 	schema   = "users_db"
 )

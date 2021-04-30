@@ -1,8 +1,9 @@
 package ping
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func ServerHello(c *gin.Context) {
