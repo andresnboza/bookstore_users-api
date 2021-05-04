@@ -12,30 +12,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetUser(c *gin.Context) {
-	user_id, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-
+func getUserId(userIdParam string) (int64, *errors.RestErr) {
+	user_id, userErr := strconv.ParseInt(userIdParam, 10, 64)
 	if userErr != nil {
-		err := errors.NewBadRequestError("user_id should be a number")
-		c.JSON(err.Status, err)
-		return
+		return 0, errors.NewBadRequestError("user id should be a number")
 	}
-
-	user, getErr := services.GetUser(user_id)
-	
-	if getErr != nil {
-		c.JSON(getErr.Status, getErr)
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
+	return user_id, nil
 }
 
-func CreateUser(c *gin.Context) {
+func Create(c *gin.Context) {
 	var user users.User
-
-	// Getting the json representation of the user
-	// and validation the json representation
+	// Getting the json representation of the user and validation the json representation
 	if err := c.ShouldBindJSON(&user); err != nil {
 		restErr := errors.NewBadRequestError("invalid json body")
 		c.JSON(restErr.Status, restErr)
@@ -54,16 +41,27 @@ func CreateUser(c *gin.Context) {
 	return
 }
 
-func SearchUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "implement me!")
+func Get(c *gin.Context) {
+
+	userId, idErr := getUserId(c.Param("userId"))
+	if idErr != nil {
+		c.JSON(idErr.Status, idErr)
+		return
+	}
+
+	user, getErr := services.GetUser(userId)
+	if getErr != nil {
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
-func UpdateUser(c *gin.Context) {
-	user_id, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-
-	if userErr != nil {
-		err := errors.NewBadRequestError("user_id should be a number")
-		c.JSON(err.Status, err)
+func Update(c *gin.Context) {
+	userId, idErr := getUserId(c.Param("userId"))
+	if idErr != nil {
+		c.JSON(idErr.Status, idErr)
 		return
 	}
 
@@ -74,7 +72,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	user.Id = user_id
+	user.Id = userId
 
 	isPartial := c.Reques.Method == http.MethodPatch
 
@@ -85,4 +83,19 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+func Delete(c *gin.Context) {
+	userId, idErr := getUserId(c.Param("userId"))
+	if idErr != nil {
+		c.JSON(idErr.Status, idErr)
+		return
+	}
+
+	if err := services.DeleteUser(userId); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
 }
