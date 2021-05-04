@@ -1,6 +1,8 @@
 package services
 
 import (
+	"bookstore_users-api/domain/users"
+
 	"github.com/andresnboza/bookstore_users-api/domain/users"
 	"github.com/andresnboza/bookstore_users-api/utils/errors"
 )
@@ -29,4 +31,21 @@ func GetUser(user_id int64) (*users.User, *errors.RestErr) {
 
 func SearchUser(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
+}
+
+func UpdateUser(user users.User) (*users.User, *errors.RestErr) {
+	current, err := GetUser(user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	current.FirstName = user.FirstName
+	current.LastName = user.LastName
+	current.Email = user.Email
+
+	if err := current.Update(); err != nil {
+		return nil, err
+	} 
+
+	return current, nil
 }

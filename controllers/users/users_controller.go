@@ -1,12 +1,15 @@
 package users
 
 import (
-	"github.com/gin-gonic/gin"
+	"bookstore_users-api/services"
+	"bookstore_users-api/utils/errors"
 	"net/http"
 	"strconv"
+
 	"github.com/andresnboza/bookstore_users-api/domain/users"
 	"github.com/andresnboza/bookstore_users-api/services"
 	"github.com/andresnboza/bookstore_users-api/utils/errors"
+	"github.com/gin-gonic/gin"
 )
 
 func GetUser(c *gin.Context) {
@@ -53,4 +56,31 @@ func CreateUser(c *gin.Context) {
 
 func SearchUser(c *gin.Context) {
 	c.String(http.StatusNotImplemented, "implement me!")
+}
+
+func UpdateUser(c *gin.Context) {
+	user_id, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+
+	if userErr != nil {
+		err := errors.NewBadRequestError("user_id should be a number")
+		c.JSON(err.Status, err)
+		return
+	}
+
+	var user users.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	user.Id = user_id
+
+	result, err := services.UpdateUser(user)
+	if err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 }
