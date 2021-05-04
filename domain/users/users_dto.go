@@ -27,6 +27,17 @@ func Validate(user *User) *errors.RestErr {
 // Map over the user instance
 // Called using: user.Validate()
 func (user *User) Validate() *errors.RestErr {
+	
+	user.FirstName = strings.TrimSpace(strings.ToLower(user.FirstName))
+	if user.FirstName == "" {
+		return errors.NewBadRequestError("invalid FirstName address")
+	}
+
+	user.LastName = strings.TrimSpace(strings.ToLower(user.LastName))
+	if user.LastName == "" {
+		return errors.NewBadRequestError("invalid LastName address")
+	}
+	
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	if user.Email == "" {
 		return errors.NewBadRequestError("invalid email address")
