@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	"github.com/user/bookstore_users-api/domain/users"
-	"github.com/user/bookstore_users-api/services"
-	"github.com/user/bookstore_users-api/utils/errors"
+	"github.com/andresnboza/bookstore_users-api/domain/users"
+	"github.com/andresnboza/bookstore_users-api/services"
+	"github.com/andresnboza/bookstore_users-api/utils/errors"
 )
 
 func GetUser(c *gin.Context) {

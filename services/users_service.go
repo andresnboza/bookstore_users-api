@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/user/bookstore_users-api/domain/users"
-	"github.com/user/bookstore_users-api/utils/errors"
+	"github.com/andresnboza/bookstore_users-api/domain/users"
+	"github.com/andresnboza/bookstore_users-api/utils/errors"
 )
 
 func CreateUser(user users.User) (*users.User, *errors.RestErr) {

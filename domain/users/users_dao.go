@@ -1,10 +1,10 @@
 package users
 
 import (
-	"github.com/user/bookstore_users-api/datasources/mysql/users_db"
-	"github.com/user/bookstore_users-api/utils/date_utils"
-	"github.com/user/bookstore_users-api/utils/errors"
-	"github.com/user/bookstore_users-api/utils/mysql_utils"
+	"github.com/andresnboza/bookstore_users-api/datasources/mysql/users_db"
+	"github.com/andresnboza/bookstore_users-api/utils/date_utils"
+	"github.com/andresnboza/bookstore_users-api/utils/errors"
+	"github.com/andresnboza/bookstore_users-api/utils/mysql_utils"
 )
 
 const (
