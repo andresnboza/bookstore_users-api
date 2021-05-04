@@ -1,7 +1,7 @@
 package app
 
 import (
-	"bookstore_users-api/controllers/ping/ping"
+	"github.com/andresnboza/bookstore_users-api/controllers/ping/ping"
 	"github.com/andresnboza/bookstore_users-api/controllers/users"
 )
 
