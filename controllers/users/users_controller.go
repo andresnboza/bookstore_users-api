@@ -1,14 +1,11 @@
 package users
 
 import (
-	"bookstore_users-api/services"
-	"bookstore_users-api/utils/errors"
 	"net/http"
 	"strconv"
-
-	"github.com/andresnboza/bookstore_users-api/domain/users"
-	"github.com/andresnboza/bookstore_users-api/services"
-	"github.com/andresnboza/bookstore_users-api/utils/errors"
+	"bookstore_users-api/domain/users"
+	"bookstore_users-api/services"
+	"bookstore_users-api/utils/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -74,7 +71,7 @@ func Update(c *gin.Context) {
 
 	user.Id = userId
 
-	isPartial := c.Reques.Method == http.MethodPatch
+	isPartial := c.Request.Method == http.MethodPatch
 
 	result, err := services.UpdateUser(isPartial, user)
 	if err != nil {

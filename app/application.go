@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/andresnboza/bookstore_users-api/app"
 )
 
 var (
@@ -11,5 +10,5 @@ var (
 
 func StartApplication() {
 	mapUrls()
-	router.Run(":8080")
+	router.Run(":8081")
 }

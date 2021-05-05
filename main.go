@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/andresnboza/bookstore_users-api/app"
+	"bookstore_users-api/app"
 )
 
 func main() {
-	fmt.Println("Server working on: http://localhost:8080")
+	fmt.Println("Server working on: http://localhost:8081")
 	app.StartApplication()
 }

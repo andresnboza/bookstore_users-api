@@ -2,11 +2,7 @@ package users
 
 import (
 	"bookstore_users-api/utils/mysql_utils"
-
-	"github.com/andresnboza/bookstore_users-api/datasources/mysql/	"
-	"github.com/andresnboza/bookstore_users-api/utils/date_utils"
-	"github.com/andresnboza/bookstore_users-api/utils/errors"
-	"github.com/andresnboza/bookstore_users-api/utils/mysql_utils"
+	"bookstore_users-api/utils/errors"
 )
 
 const (
@@ -99,7 +95,7 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 	}
 	defer rows.Close()
 
-	var results := make([]User, 0)
+	var results = make([]User, 0)
 	for rows.Next() {
 		var user User
 		if err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); err != nil {
