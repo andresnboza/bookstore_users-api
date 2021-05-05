@@ -3,19 +3,20 @@ package users
 import (
 	"bookstore_users-api/utils/mysql_utils"
 
-	"github.com/andresnboza/bookstore_users-api/datasources/mysql/users_db"
+	"github.com/andresnboza/bookstore_users-api/datasources/mysql/	"
 	"github.com/andresnboza/bookstore_users-api/utils/date_utils"
 	"github.com/andresnboza/bookstore_users-api/utils/errors"
 	"github.com/andresnboza/bookstore_users-api/utils/mysql_utils"
 )
 
 const (
-	indexUniqueEmail = "email_UNIQUE"
-	errorNoRows      = "no rows in result set"
-	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
-	queryGetUser     = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
-	queryUpdateUser  = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
-	queryDeleteUser  = "DELETE FROM users where id=?;"
+	indexUniqueEmail 		= "email_UNIQUE"
+	errorNoRows      		= "no rows in result set"
+	queryInsertUser  		= "INSERT INTO users(first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
+	queryGetUser     		= "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
+	queryUpdateUser  		= "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
+	queryDeleteUser  		= "DELETE FROM users where id=?;"
+	queryFindUserByStatus 	= "SELECT id, first_name, last_name, email, date_created, status FROM users WHERE status=?;"
 )
 
 func (user *User) Get() *errors.RestErr {
@@ -85,4 +86,33 @@ func (user *User) Delete() *errors.RestErr {
 	}
 
 	return nil
+}
+
+func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
+	stmt, err := users_db.Client.Prepare(queryFindUserByStatus) // Preparing the statement to the user save
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close() // Very important to execute
+
+	rows, err := stmt.Query(status)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer rows.Close()
+
+	var results := make([]User, 0)
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); err != nil {
+			return nil, mysql_utils.ParseError(err)
+		}
+		results = append(results, user)
+	}
+
+	if len(results) == 0 {
+		return nil, errors.NewNotFound(fmt.Sprintf("no users matching status %s", status))
+	}
+
+	return results, nil
 }
